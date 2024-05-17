@@ -21,9 +21,11 @@ def login():
         session.permanent = True
         user = request.form["nm"]
         session["user"] = user
+        flash("Succesful login!", "info")
         return redirect(url_for("user"))
     else:
         if "user" in session:
+            flash("Already logged in!", "info")
             return redirect(url_for("user"))
         return render_template("login.html")
 
@@ -31,7 +33,7 @@ def login():
 def user():
     if "user" in session:
         user = session["user"]
-        return render_template("index.html", content = f"{user}")
+        return render_template("user.html", user = user)
     else:
         return redirect(url_for("login"))
 
@@ -39,7 +41,9 @@ def user():
 def logout():
     if "user" in session:
         user = session["user"]
-        flash(f"user {user} has succesfully logged out!", "info")
+        flash(f"user \'{user}\' has succesfully logged out!", "info")
+    else:
+        flash("No user to logout, please login below!")
     session.pop("user", None)
     
     return redirect(url_for("login"))
