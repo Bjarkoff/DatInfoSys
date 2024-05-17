@@ -1,7 +1,8 @@
 # save this as app.py
-from flask import Flask, redirect, url_for, render_template, request
+from flask import Flask, redirect, url_for, render_template, request, session
 
 app = Flask(__name__)
+app.secret_key = "abcdEFGHw"
 
 @app.route("/<name>")
 def home(name):
@@ -15,13 +16,18 @@ def home2():
 def login():
     if request.method == "POST":
         user = request.form["nm"]
-        return redirect(url_for("user", usr=user))
+        session["user"] = user
+        return redirect(url_for("user"))
     else:
         return render_template("login.html")
 
-@app.route("/<usr>")
-def user(usr):
-    return render_template("index.html", content = f"{usr}")
+@app.route("/user")
+def user():
+    if "user" in session:
+        user = session["user"]
+        return render_template("index.html", content = f"{user}")
+    else:
+        return redirect(url_for("login"))
 
 """ @app.route("/<name>")
 def user(name):
