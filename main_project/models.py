@@ -10,9 +10,9 @@ class Player():
     self.id       = Player.id
     Player.id += 1
 
-bjarke = Player("bjarkoff","hugu",1780)
+""" bjarke = Player("bjarkoff","hugu",1780)
 print(Player.id)
-print(bjarke.id)
+print(bjarke.id) """
 
 class Team():
   def __init__(self,name):
