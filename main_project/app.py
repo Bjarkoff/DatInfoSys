@@ -81,7 +81,37 @@ def logout():
   session.pop("user", None)  
   return redirect(url_for("login"))
 
-
+@app.route("/register", methods = ["GET","POST"])
+def register():
+  if request.method == "POST":
+    print("Are we here?")
+    user     = request.form["username"]
+    password = request.form["password"]
+    rating   = request.form["rating"]
+    conn = get_db_connection()
+    cur = conn.cursor()
+    # Now we test if the username is already in use in our database
+    cur.execute(f"SELECT * FROM players p WHERE p.username = \'{user}\';")
+    user_list = cur.fetchall()
+    if user_list == []:
+      new_player = Player(user,password,rating)
+      cur.execute("INSERT INTO players (id,username,password,rating) VALUES (%s,%s,%s,%s);", (
+          new_player.id,
+          new_player.username,
+          new_player.password,
+          new_player.rating,
+      ))
+      conn.commit()
+      flash(f"New user {user} registered succesfully!", "info")
+      cur.close()
+      conn.close()
+      
+      return redirect("/")
+    else:
+      flash(f"Username {user} already in use! Please choose another username.", "info")
+      return redirect("/register")
+  else:
+    return render_template("register.html")
 
 if __name__ == "__main__":
     app.run(debug=True) 
