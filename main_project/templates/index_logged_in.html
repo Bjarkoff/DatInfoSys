@@ -1,0 +1,16 @@
+{% extends "navbar_logged_in.html" %}
+
+{% block title %}Home page{% endblock %}
+{% block content %}
+  {% with messages = get_flashed_messages() %}
+    {% if messages  %}
+      {% for msg in messages: %}
+        <p>{{msg}}</p>
+      {% endfor %}
+    {% endif %}  
+  {% endwith %}
+<p>
+  Please make a query in our chess team match database, or upload a PGN from a team match.
+  Our PGN uploader will automatically place it correctly in the database. 
+</p>
+{% endblock %}
