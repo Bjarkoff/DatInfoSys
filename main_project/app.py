@@ -43,7 +43,7 @@ def home():
 def login():
   if request.method == "POST":
     
-    session.permanent = True
+    
     user = request.form["username"]
     password = request.form["password"]
     print(f"The username and password passed in: {user}, {password}")
@@ -59,6 +59,7 @@ def login():
       conn.close()
       return redirect("/login")
     else:
+      session.permanent = True 
       session["user"] = user
       flash(f"Succesful login! Welcome, {user}", "info")
       cur.close()
