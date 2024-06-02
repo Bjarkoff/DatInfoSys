@@ -24,10 +24,10 @@
     <link rel="stylesheet" href="/static/style.css" />
   </head>
   <body>
-    <h1>Transactions</h1>
+    <h1>Games</h1>
     <ol>
       {% for entry in entries %}
-        <li>game {{ entry[2] }}: result {{entry[1]}} on {{entry[0]}} </li>
+        <li>game {{ entry[2] }}: result {{entry[1]}} </li><br>
       {% endfor %}
     </ol>
   </body>

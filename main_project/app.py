@@ -18,16 +18,49 @@ cur = conn.cursor()
 # ------------------- Initializing a simple database with a few players: --------------------
 cur.execute("DROP TABLE IF EXISTS players;")
 cur.execute("DROP TABLE IF EXISTS chessgames;")
-cur.execute("CREATE TABLE IF NOT EXISTS players (id INT," + 
+cur.execute("DROP TABLE IF EXISTS teams;")
+cur.execute("DROP TABLE IF EXISTS plays;")
+cur.execute("DROP TABLE IF EXISTS player_teams")
+cur.execute("CREATE TABLE players (id INT," + 
             " username CHAR(100), password CHAR(100),rating REAL);")
 test_player = Player("Bjarke",'righty',1780)
+test_player2 = Player("Oscar",'test',1980)
+test_player3 = Player("Niels","test",1000)
+test_player4 = Player("Dragos","test",2500)
 cur.execute("INSERT INTO players (id,username,password,rating) VALUES (%s,%s,%s,%s);", (
           test_player.id,
           test_player.username,
           test_player.password,
           test_player.rating,
       ))
-cur.execute("CREATE TABLE IF NOT EXISTS chessgames (date DATE," + 
+cur.execute("INSERT INTO players (id,username,password,rating) VALUES (%s,%s,%s,%s);", (
+          test_player2.id,
+          test_player2.username,
+          test_player2.password,
+          test_player2.rating,
+      ))
+cur.execute("INSERT INTO players (id,username,password,rating) VALUES (%s,%s,%s,%s);", (
+          test_player3.id,
+          test_player3.username,
+          test_player3.password,
+          test_player3.rating,
+      ))
+cur.execute("INSERT INTO players (id,username,password,rating) VALUES (%s,%s,%s,%s);", (
+          test_player4.id,
+          test_player4.username,
+          test_player4.password,
+          test_player4.rating,
+      ))
+cur.execute("CREATE TABLE plays (player CHAR(100), color CHAR(10),game_id INT);")
+cur.execute("INSERT INTO plays (player, color, game_id) VALUES (%s, %s, %s);", 
+            ("Bjarke", "Black", "17"))
+cur.execute("INSERT INTO plays (player, color, game_id) VALUES (%s, %s, %s);", 
+            ("Oscar", "White", "17"))
+cur.execute("INSERT INTO plays (player, color, game_id) VALUES (%s, %s, %s);", 
+            ("Niels", "White", "16"))
+cur.execute("INSERT INTO plays (player, color, game_id) VALUES (%s, %s, %s);", 
+            ("Dragos", "Black", "16"))
+cur.execute("CREATE TABLE chessgames (date DATE," + 
             " result CHAR(100), gameid INT,moves VARCHAR," +
             " round CHAR(100), event CHAR(100), board CHAR(100));")
 cur.execute("INSERT INTO chessgames (date,result,gameid,board,round,event,moves) VALUES (%s,%s,%s,%s,%s,%s,%s);", (
@@ -36,9 +69,27 @@ cur.execute("INSERT INTO chessgames (date,result,gameid,board,round,event,moves)
           "17",
           "7",
           "3.5",
-          "Bundeslige 23-24",
+          "Bundesliga 23-24",
           "1. e4 e5",
       ))
+cur.execute("INSERT INTO chessgames (date,result,gameid,board,round,event,moves) VALUES (%s,%s,%s,%s,%s,%s,%s);", (
+          "2024-05-13",
+          "1/2-1/2",
+          "16",
+          "6",
+          "3.5",
+          "Bundesliga 23-24",
+          "1. e4 d5",
+      ))
+cur.execute("CREATE TABLE teams (name CHAR(100), event CHAR(100))")
+cur.execute("INSERT INTO teams (name, event) VALUES (%s,%s);", ("team1","Bundesliga 23-24",))
+cur.execute("INSERT INTO teams (name, event) VALUES (%s,%s);", ("team2","Bundesliga 23-24",))
+cur.execute("CREATE TABLE player_teams (player_name CHAR(100), team_name CHAR(100))")
+cur.execute("INSERT INTO player_teams (player_name, team_name) VALUES (%s,%s);", ("Bjarke","team1"))
+cur.execute("INSERT INTO player_teams (player_name, team_name) VALUES (%s,%s);", ("Oscar","team2"))
+cur.execute("INSERT INTO player_teams (player_name, team_name) VALUES (%s,%s);", ("Niels","team1"))
+cur.execute("INSERT INTO player_teams (player_name, team_name) VALUES (%s,%s);", ("Dragos","team2"))
+
 conn.commit()
 cur.close()
 conn.close()
@@ -161,6 +212,7 @@ def search():
       pass
     else:
       pass
+    print(len(query_results))
     return render_template("search_results_not_logged_in.html", entries = query_results)
   else:
     return render_template("search_database_not_logged_in.html")
@@ -172,8 +224,6 @@ def upload():
     return render_template("upload_results.html", pgn=pgn)
   else:
     return render_template("upload.html")
-
-
 
 if __name__ == "__main__":
     app.run(debug=True) 
