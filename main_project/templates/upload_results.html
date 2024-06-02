@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PGN Display</title>
+</head>
+<body>
+  {% if pgn %}
+    <h1>PGN Received:</h1>
+    <p>{{ pgn }}</p>
+  {% else %}
+    <h1>No PGN Submitted</h1>
+  {% endif %}
+</body>
+</html>
