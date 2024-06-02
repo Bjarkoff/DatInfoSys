@@ -218,14 +218,13 @@ def search():
     return render_template("search_database_not_logged_in.html")
 
 
-
-
-
-
-
-
-
-
+@app.route("/upload", methods = ["GET","POST"])
+def upload():
+  if request.method == "POST":
+    pgn = request.form['PGN']
+    return render_template("upload_results.html", pgn=pgn)
+  else:
+    return render_template("upload.html")
 
 
 if __name__ == "__main__":
