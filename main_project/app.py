@@ -9,8 +9,8 @@ app.secret_key = "abcdEFGHw"
 app.permanent_session_lifetime = timedelta(seconds= 30)
 
 def get_db_connection(): 
-  conn = psycopg2.connect(host="localhost", dbname="DIS_project", user="bjarkerasmusnicolaisen", 
-                        port="5432")
+  conn = psycopg2.connect(host="localhost", dbname="DIS_project", user="postgres", 
+                        port="5432", password="admin")
   return conn
 conn = get_db_connection()
 cur = conn.cursor()
@@ -165,14 +165,13 @@ def search():
   else:
     return render_template("search_database_not_logged_in.html")
 
-
-
-
-
-
-
-
-
+@app.route("/upload", methods = ["GET","POST"])
+def upload():
+  if request.method == "POST":
+    pgn = request.form['PGN']
+    return render_template("upload_results.html", pgn=pgn)
+  else:
+    return render_template("upload.html")
 
 
 
