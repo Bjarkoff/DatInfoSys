@@ -95,6 +95,41 @@ cur.close()
 conn.close()
 
 
+
+
+# ---------------------------- Logic for querying database later -------------------------------
+
+def get_chessgames_by_filters(date=None, event=None,
+                           game_id=None, round=None):
+  sql = """
+  SELECT * FROM chessgames
+  WHERE
+  """
+  conditionals = []
+  if date:
+    conditionals.append(f"date='{date}'")
+  if event:
+    conditionals.append(f"event = '{event}'")
+  if game_id:
+    conditionals.append(f"game_id = '{game_id}'")
+  if round:
+    conditionals.append(f"round = '{round}'")
+
+  args_str = ' AND '.join(conditionals)
+  # order = " ORDER BY rating "
+  print(sql + args_str)
+  conn = get_db_connection()
+  cur = conn.cursor()
+  cur.execute(sql + args_str)
+  # db_cursor.execute(sql + args_str + order)
+  # chessgames = [Produce(res) for res in db_cursor.fetchall()] if db_cursor.rowcount > 0 else []
+  chessgames = cur.fetchall()
+  # conn.commit()
+  cur.close()
+  conn.close()
+  return chessgames
+
+
 @app.route("/")
 def home():
   if "user" in session:
@@ -181,7 +216,6 @@ def register():
 @app.route("/search", methods = ["GET", "POST"])
 def search():
   if request.method == "POST":
-    print("are we in the post-search branch?")
     conn = get_db_connection()
     cur = conn.cursor()
     query_results = []
@@ -192,8 +226,14 @@ def search():
     query_id    = request.form["gameid"]
     query_round = request.form["round"]
     query_event = request.form["event"]
-    if query_type == "None":
-      query_string = query_string + "SELECT * FROM chessgames"
+    """ if query_name  == '': query_name  = None
+    if query_date  == '': query_date  = None
+    if query_id    == '': query_id    = None
+    if query_round == '': query_round = None
+    if query_event == '': query_event = None """
+    query_results = get_chessgames_by_filters(query_date,query_event,query_id,query_round)
+    """ if query_type == "None":
+      query_string = query_string + "SELECT * FROM chessgames NATURAL JOIN plays"
       if query_date  != "":
         query_string = query_string + f" WHERE date = {query_date}"
       if query_id    != "":
@@ -212,7 +252,7 @@ def search():
       pass
     else:
       pass
-    print(len(query_results))
+    print(len(query_results)) """
     return render_template("search_results_not_logged_in.html", entries = query_results)
   else:
     return render_template("search_database_not_logged_in.html")
