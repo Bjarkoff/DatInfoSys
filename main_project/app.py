@@ -6,7 +6,7 @@ import psycopg2
 
 app = Flask(__name__)
 app.secret_key = "abcdEFGHw"
-app.permanent_session_lifetime = timedelta(seconds= 30)
+app.permanent_session_lifetime = timedelta(minutes= 5)
 
 def get_db_connection(): 
   conn = psycopg2.connect(host="localhost", dbname="DIS_project", user="bjarkerasmusnicolaisen", 
@@ -137,7 +137,15 @@ AND plt1.player_id = pl1.id AND plt2.player_id = pl2.id
   conn.close()
   return chessgames
 
-
+def get_players_teamname(name):
+  sql = f"SELECT team_name FROM players p, player_teams pt WHERE p.id = pt.player_id AND p.username = '{name}'"
+  conn = get_db_connection()
+  cur = conn.cursor()
+  cur.execute(sql)
+  teamname = cur.fetchall()
+  cur.close()
+  conn.close()
+  return teamname
 @app.route("/")
 def home():
   if "user" in session:
@@ -233,36 +241,14 @@ def search():
     query_id          = request.form["gameid"]
     query_round       = request.form["round"]
     query_event       = request.form["event"]
-    print(f"playername is: {query_playername}")
-    """ if query_name  == '': query_name  = None
-    if query_date  == '': query_date  = None
-    if query_id    == '': query_id    = None
-    if query_round == '': query_round = None
-    if query_event == '': query_event = None """
     query_results = get_chessgames_by_filters(query_date,query_event,query_playername,
                                               query_teamname,query_id,query_round)
-    """ if query_type == "None":
-      query_string = query_string + "SELECT * FROM chessgames NATURAL JOIN plays"
-      if query_date  != "":
-        query_string = query_string + f" WHERE date = {query_date}"
-      if query_id    != "":
-        query_string = query_string + f" AND gameid = {query_id}"
-      if query_round != "":
-        query_string = query_string + f" AND round = {query_round}"
-      if query_event != "":
-        query_string = query_string + f" AND event = {query_event}"
-      query_string = query_string + ";"
-      cur.execute(query_string)
-      query_results = cur.fetchall()
-      conn.commit()
-      cur.close()
-      conn.close()
-    elif query_type == "Team":
-      pass
+
+    if "user" in session:
+      username = get_players_teamname(session["user"])
+      return render_template("search_results_logged_in.html", entries = query_results, team_name = username[0][0])
     else:
-      pass
-    print(len(query_results)) """
-    return render_template("search_results_not_logged_in.html", entries = query_results)
+      return render_template("search_results_not_logged_in.html", entries = query_results)
   else:
     return render_template("search_database_not_logged_in.html")
 
