@@ -9,7 +9,7 @@ app.secret_key = "abcdEFGHw"
 app.permanent_session_lifetime = timedelta(seconds= 30)
 
 def get_db_connection(): 
-  conn = psycopg2.connect(host="localhost", dbname="DIS_project", user="postgres", 
+  conn = psycopg2.connect(host="localhost", dbname="DIS_project", user="bjarkerasmusnicolaisen", 
                         port="5432", password="admin")
   return conn
 conn = get_db_connection()
@@ -51,15 +51,15 @@ cur.execute("INSERT INTO players (id,username,password,rating) VALUES (%s,%s,%s,
           test_player4.password,
           test_player4.rating,
       ))
-cur.execute("CREATE TABLE plays (player CHAR(100), color CHAR(10),game_id INT);")
+cur.execute("CREATE TABLE plays (player INT, color CHAR(10),game_id INT);")
 cur.execute("INSERT INTO plays (player, color, game_id) VALUES (%s, %s, %s);", 
-            ("Bjarke", "Black", "17"))
+            (test_player.id, "Black", "17"))
 cur.execute("INSERT INTO plays (player, color, game_id) VALUES (%s, %s, %s);", 
-            ("Oscar", "White", "17"))
+            (test_player2.id, "White", "17"))
 cur.execute("INSERT INTO plays (player, color, game_id) VALUES (%s, %s, %s);", 
-            ("Niels", "White", "16"))
+            (test_player3.id, "White", "16"))
 cur.execute("INSERT INTO plays (player, color, game_id) VALUES (%s, %s, %s);", 
-            ("Dragos", "Black", "16"))
+            (test_player4.id, "Black", "16"))
 cur.execute("CREATE TABLE chessgames (date DATE," + 
             " result CHAR(100), gameid INT,moves VARCHAR," +
             " round CHAR(100), event CHAR(100), board CHAR(100));")
@@ -84,11 +84,11 @@ cur.execute("INSERT INTO chessgames (date,result,gameid,board,round,event,moves)
 cur.execute("CREATE TABLE teams (name CHAR(100), event CHAR(100))")
 cur.execute("INSERT INTO teams (name, event) VALUES (%s,%s);", ("team1","Bundesliga 23-24",))
 cur.execute("INSERT INTO teams (name, event) VALUES (%s,%s);", ("team2","Bundesliga 23-24",))
-cur.execute("CREATE TABLE player_teams (player_name CHAR(100), team_name CHAR(100))")
-cur.execute("INSERT INTO player_teams (player_name, team_name) VALUES (%s,%s);", ("Bjarke","team1"))
-cur.execute("INSERT INTO player_teams (player_name, team_name) VALUES (%s,%s);", ("Oscar","team2"))
-cur.execute("INSERT INTO player_teams (player_name, team_name) VALUES (%s,%s);", ("Niels","team1"))
-cur.execute("INSERT INTO player_teams (player_name, team_name) VALUES (%s,%s);", ("Dragos","team2"))
+cur.execute("CREATE TABLE player_teams (player_id INT, team_name CHAR(100))")
+cur.execute("INSERT INTO player_teams (player_id, team_name) VALUES (%s,%s);", (test_player.id,"team1"))
+cur.execute("INSERT INTO player_teams (player_id, team_name) VALUES (%s,%s);", (test_player2.id,"team2"))
+cur.execute("INSERT INTO player_teams (player_id, team_name) VALUES (%s,%s);", (test_player3.id,"team1"))
+cur.execute("INSERT INTO player_teams (player_id, team_name) VALUES (%s,%s);", (test_player4.id,"team2"))
 
 conn.commit()
 cur.close()
@@ -99,28 +99,36 @@ conn.close()
 
 # ---------------------------- Logic for querying database later -------------------------------
 
-def get_chessgames_by_filters(date=None, event=None,
+def get_chessgames_by_filters(date=None, event=None, player_name=None, team_name=None,
                            game_id=None, round=None):
   sql = """
-  SELECT * FROM chessgames
-  WHERE
+  SELECT pl1.username, plt1.team_name, pl2.username, plt2.team_name date, result, moves FROM players pl1, players pl2, plays p1, plays p2, chessgames g, player_teams plt1, player_teams plt2 WHERE
+p1.player <> p2.player AND g.gameid = p1.game_id AND p2.game_id = p1.game_id
+AND pl1.id = p1.player AND pl2.id = p2.player AND p1.color = 'White'
+AND plt1.player_id = pl1.id AND plt2.player_id = pl2.id
   """
   conditionals = []
-  if date:
-    conditionals.append(f"date='{date}'")
-  if event:
-    conditionals.append(f"event = '{event}'")
-  if game_id:
-    conditionals.append(f"game_id = '{game_id}'")
-  if round:
-    conditionals.append(f"round = '{round}'")
-
-  args_str = ' AND '.join(conditionals)
+  print(player_name)
+  print(player_name == True)
+  if player_name != '':
+    sql = sql + f" AND (pl1.username='{player_name}' OR pl2.username='{player_name}')"
+  if team_name != '':
+    sql = sql + f" AND (plt1.team_name='{team_name}' OR plt2.team_name='{team_name}')" 
+  if date != '':
+    sql = sql + f" AND date='{date}'"
+  if event != '':
+    sql = sql + f" AND event = '{event}'"
+  if game_id != '':
+    sql = sql + f" AND game_id = '{game_id}'"
+  if round != '':
+    sql = sql + f" AND round = '{round}'"
+  print(sql)
+  #args_str = ' AND '.join(conditionals)
   # order = " ORDER BY rating "
-  print(sql + args_str)
+  #print(sql + args_str)
   conn = get_db_connection()
   cur = conn.cursor()
-  cur.execute(sql + args_str)
+  cur.execute(sql)
   # db_cursor.execute(sql + args_str + order)
   # chessgames = [Produce(res) for res in db_cursor.fetchall()] if db_cursor.rowcount > 0 else []
   chessgames = cur.fetchall()
@@ -219,19 +227,20 @@ def search():
     conn = get_db_connection()
     cur = conn.cursor()
     query_results = []
-    query_string = ""
-    query_type  = request.form["type"]
-    query_name  = request.form["name"]
-    query_date  = request.form["date"]
-    query_id    = request.form["gameid"]
-    query_round = request.form["round"]
-    query_event = request.form["event"]
+    query_teamname    = request.form["team_name"]
+    query_playername  = request.form["player_name"]
+    query_date        = request.form["date"]
+    query_id          = request.form["gameid"]
+    query_round       = request.form["round"]
+    query_event       = request.form["event"]
+    print(f"playername is: {query_playername}")
     """ if query_name  == '': query_name  = None
     if query_date  == '': query_date  = None
     if query_id    == '': query_id    = None
     if query_round == '': query_round = None
     if query_event == '': query_event = None """
-    query_results = get_chessgames_by_filters(query_date,query_event,query_id,query_round)
+    query_results = get_chessgames_by_filters(query_date,query_event,query_playername,
+                                              query_teamname,query_id,query_round)
     """ if query_type == "None":
       query_string = query_string + "SELECT * FROM chessgames NATURAL JOIN plays"
       if query_date  != "":
