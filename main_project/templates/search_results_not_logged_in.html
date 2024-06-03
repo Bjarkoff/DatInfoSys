@@ -27,7 +27,7 @@
     <h1>Games</h1>
     <ol>
       {% for entry in entries %}
-        <li>game {{ entry[2] }}: result {{entry[1]}} </li><br>
+        <li> {{ entry[0] }} from team {{ entry[1]}} - {{entry[2]}} from team {{ entry[3]}}, result: {{ entry[4] }} </li><br>
       {% endfor %}
     </ol>
   </body>

@@ -24,14 +24,11 @@
   have been involved in.
 </p>
 <form method="POST" action="/search">
-  <label for="type">Type of Search:</label>
-    <select name="type" id="account" class="form__input form__select">
-      <option value="Player">Player</option>
-      <option value="Team">Team</option>
-      <option value="None">None</option>
-    </select><br><br>
-    <label for="fideID">Player/Team Name:</label><br>
-    <input type="text" id="name" name="name"><br>
+
+  <label for="player_name">Player Name:</label><br>
+  <input type="text" id="player_name" name="player_name"><br>
+  <label for="team_name">Team Name:</label><br>
+  <input type="text" id="team_name" name="team_name"><br>
   <label for="date">Date:</label><br>
   <input type="date" name="date" id="date"/><br>
   <label for="fideID">FideID of player:</label><br>
