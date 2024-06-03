@@ -1,0 +1,49 @@
+<!-- from https://www.w3schools.com/html/html_forms.asp -->
+
+{% extends "navbar_logged_in.html" %}
+
+{% block title %}Search database{% endblock %}
+{% block content %}
+  {% with messages = get_flashed_messages() %}
+    {% if messages  %}
+      {% for msg in messages: %}
+        <p>{{msg}}</p>
+      {% endfor %}
+    {% endif %}  
+  {% endwith %}
+
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Search chess game database</h2>
+<p>
+  Please enter values below for your search. You may fill out as many fields as you like. Note that
+  if your are not logged in, you will not be able to see actual moves of games.
+  Only by logging in are you allowed to see actual moves for any games that you or your team
+  have been involved in.
+</p>
+<form method="POST" action="/search">
+
+  <label for="player_name">Player Name:</label><br>
+  <input type="text" id="player_name" name="player_name"><br>
+  <label for="team_name">Team Name:</label><br>
+  <input type="text" id="team_name" name="team_name"><br>
+  <label for="date">Date:</label><br>
+  <input type="date" name="date" id="date"/><br>
+  <label for="fideID">FideID of player:</label><br>
+  <input type="text" id="fideID" name="fideID"><br>
+  <label for="round">Round:</label><br>
+  <input type="text" id="round" name="round"><br>
+  <label for="event">Event:</label><br>
+  <input type="text" id="event" name="event"><br>
+  <label for="gameid">gameID:</label><br>
+  <input type="text" id="gameid" name="gameid"><br><br>
+  <input type="submit" value="Submit">
+</form> 
+
+<p>If you click the "Submit" button, the matching games in our database will be displayed.</p>
+
+</body>
+</html>
+{% endblock %}

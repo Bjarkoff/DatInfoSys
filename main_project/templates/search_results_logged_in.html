@@ -1,4 +1,4 @@
-{% extends "navbar_not_logged_in.html" %}
+{% extends "navbar_logged_in.html" %}
 
 {% block title %}Search results{% endblock %}
 {% block content %}
@@ -27,7 +27,12 @@
     <h1>Games</h1>
     <ol>
       {% for entry in entries %}
+        {% if entry[1] == team_name or entry[3] == team_name: %}
+          <li> {{ entry[0] }} from team {{ entry[1]}} - {{entry[2]}} from team {{ entry[3]}}, result: {{ entry[4] }}. <br>
+          And the moves: {{ entry[5] }} </li><br>
+        {% else %}
         <li> {{ entry[0] }} from team {{ entry[1]}} - {{entry[2]}} from team {{ entry[3]}}, result: {{ entry[4] }}.</li><br>
+        {% endif %}
       {% endfor %}
     </ol>
   </body>
