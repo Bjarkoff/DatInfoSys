@@ -3,15 +3,16 @@ from flask import Flask, redirect, url_for, render_template, request, session, f
 from datetime import timedelta
 from models import Player
 import psycopg2
+from queries import *
 
 app = Flask(__name__)
 app.secret_key = "abcdEFGHw"
 app.permanent_session_lifetime = timedelta(minutes= 5)
 
-def get_db_connection(): 
+""" def get_db_connection(): 
   conn = psycopg2.connect(host="localhost", dbname="DIS_project", user="bjarkerasmusnicolaisen", 
                         port="5432", password="admin")
-  return conn
+  return conn """
 conn = get_db_connection()
 cur = conn.cursor()
 
@@ -99,7 +100,7 @@ conn.close()
 
 # ---------------------------- Logic for querying database later -------------------------------
 
-def insert_new_player(username, password, rating):
+""" def insert_new_player(username, password, rating):
   conn = get_db_connection()
   cur = conn.cursor()
   new_player = Player(username,password,rating)
@@ -138,11 +139,12 @@ def test_username_and_password(name,password):
 def get_chessgames_by_filters(date=None, event=None, player_name=None, team_name=None,
                            game_id=None, round=None):
   sql = """
-  SELECT pl1.username, plt1.team_name, pl2.username, plt2.team_name date, result, moves FROM players pl1, players pl2, plays p1, plays p2, chessgames g, player_teams plt1, player_teams plt2 WHERE
+"""  SELECT pl1.username, plt1.team_name, pl2.username, plt2.team_name date, result, moves FROM players pl1, players pl2, plays p1, plays p2, chessgames g, player_teams plt1, player_teams plt2 WHERE
 p1.player <> p2.player AND g.gameid = p1.game_id AND p2.game_id = p1.game_id
 AND pl1.id = p1.player AND pl2.id = p2.player AND p1.color = 'White'
 AND plt1.player_id = pl1.id AND plt2.player_id = pl2.id
-  """
+"""
+"""
   if player_name != '':
     sql = sql + f" AND (pl1.username='{player_name}' OR pl2.username='{player_name}')"
   if team_name != '':
@@ -172,7 +174,7 @@ def get_players_teamname(name):
   cur.close()
   conn.close()
   return teamname
-
+ """
 # ------------------------------------- Routing and core functionality ----------------------------------
 
 
@@ -231,9 +233,6 @@ def register():
 @app.route("/search", methods = ["GET", "POST"])
 def search():
   if request.method == "POST":
-    conn = get_db_connection()
-    cur = conn.cursor()
-    query_results = []
     query_teamname    = request.form["team_name"]
     query_playername  = request.form["player_name"]
     query_date        = request.form["date"]
