@@ -99,6 +99,42 @@ conn.close()
 
 # ---------------------------- Logic for querying database later -------------------------------
 
+def insert_new_player(username, password, rating):
+  conn = get_db_connection()
+  cur = conn.cursor()
+  new_player = Player(username,password,rating)
+  cur.execute("INSERT INTO players (id,username,password,rating) VALUES (%s,%s,%s,%s);", (
+      new_player.id,
+      new_player.username,
+      new_player.password,
+      new_player.rating,
+  ))
+  conn.commit()
+  cur.close()
+  conn.close()
+
+
+
+def test_username(name):
+  conn = get_db_connection()
+  cur = conn.cursor()
+  # Now we test if the entered user and password is in our database
+  cur.execute(f"SELECT * FROM players p WHERE p.username = \'{name}\';")
+  user_list = cur.fetchall()
+  cur.close()
+  conn.close()
+  return user_list != []
+
+def test_username_and_password(name,password):
+  conn = get_db_connection()
+  cur = conn.cursor()
+  # Now we test if the entered user and password is in our database
+  cur.execute(f"SELECT * FROM players p WHERE p.username = \'{name}\' AND p.password = \'{password}\';")
+  user_list = cur.fetchall()
+  cur.close()
+  conn.close()
+  return user_list != []
+
 def get_chessgames_by_filters(date=None, event=None, player_name=None, team_name=None,
                            game_id=None, round=None):
   sql = """
@@ -107,9 +143,6 @@ p1.player <> p2.player AND g.gameid = p1.game_id AND p2.game_id = p1.game_id
 AND pl1.id = p1.player AND pl2.id = p2.player AND p1.color = 'White'
 AND plt1.player_id = pl1.id AND plt2.player_id = pl2.id
   """
-  conditionals = []
-  print(player_name)
-  print(player_name == True)
   if player_name != '':
     sql = sql + f" AND (pl1.username='{player_name}' OR pl2.username='{player_name}')"
   if team_name != '':
@@ -122,17 +155,10 @@ AND plt1.player_id = pl1.id AND plt2.player_id = pl2.id
     sql = sql + f" AND game_id = '{game_id}'"
   if round != '':
     sql = sql + f" AND round = '{round}'"
-  print(sql)
-  #args_str = ' AND '.join(conditionals)
-  # order = " ORDER BY rating "
-  #print(sql + args_str)
   conn = get_db_connection()
   cur = conn.cursor()
   cur.execute(sql)
-  # db_cursor.execute(sql + args_str + order)
-  # chessgames = [Produce(res) for res in db_cursor.fetchall()] if db_cursor.rowcount > 0 else []
   chessgames = cur.fetchall()
-  # conn.commit()
   cur.close()
   conn.close()
   return chessgames
@@ -146,40 +172,29 @@ def get_players_teamname(name):
   cur.close()
   conn.close()
   return teamname
+
+# ------------------------------------- Routing and core functionality ----------------------------------
+
+
 @app.route("/")
 def home():
   if "user" in session:
-    print("user in session")
     return render_template("index_logged_in.html")
-  print("user not in session")
   return render_template("index_not_logged_in.html")  
   
 
 @app.route("/login", methods = ["GET","POST"])
 def login():
   if request.method == "POST":
-    
-    
-    user = request.form["username"]
+    username = request.form["username"]
     password = request.form["password"]
-    print(f"The username and password passed in: {user}, {password}")
-    conn = get_db_connection()
-    cur = conn.cursor()
-    # Now we test if the entered user and password is in our database
-    cur.execute(f"SELECT * FROM players p WHERE p.username = \'{user}\' AND p.password = \'{password}\';")
-    user_list = cur.fetchall()
-    print(f"The fetched list of existing users from database: {user_list}")
-    if user_list == []:
-      flash(f"User or password incorrect! Try again.")
-      cur.close()
-      conn.close()
+    if test_username_and_password(username,password) == False:
+      flash(f"User or password incorrect! Try again.", "info")
       return redirect("/login")
     else:
       session.permanent = True 
-      session["user"] = user
-      flash(f"Succesful login! Welcome, {user}", "info")
-      cur.close()
-      conn.close()
+      session["user"] = username
+      flash(f"Succesful login! Welcome, {username}", "info")
     return redirect("/")
   else:
     if "user" in session:
@@ -190,8 +205,8 @@ def login():
 @app.route("/logout")
 def logout():
   if "user" in session:
-    user = session["user"]
-    flash(f"user \'{user}\' has succesfully logged out!", "info")
+    username = session["user"]
+    flash(f"user \'{username}\' has succesfully logged out!", "info")
   else:
     flash("No user to logout, please login below!")
   session.pop("user", None)  
@@ -200,31 +215,15 @@ def logout():
 @app.route("/register", methods = ["GET","POST"])
 def register():
   if request.method == "POST":
-    print("Are we here?")
-    user     = request.form["username"]
+    username = request.form["username"]
     password = request.form["password"]
     rating   = request.form["rating"]
-    conn = get_db_connection()
-    cur = conn.cursor()
-    # Now we test if the username is already in use in our database
-    cur.execute(f"SELECT * FROM players p WHERE p.username = \'{user}\';")
-    user_list = cur.fetchall()
-    if user_list == []:
-      new_player = Player(user,password,rating)
-      cur.execute("INSERT INTO players (id,username,password,rating) VALUES (%s,%s,%s,%s);", (
-          new_player.id,
-          new_player.username,
-          new_player.password,
-          new_player.rating,
-      ))
-      conn.commit()
-      flash(f"New user {user} registered succesfully!", "info")
-      cur.close()
-      conn.close()
-      
+    if test_username(username) == False:
+      flash(f"New user {username} registered succesfully!", "info")
+      insert_new_player(username, password, rating)
       return redirect("/")
     else:
-      flash(f"Username {user} already in use! Please choose another username.", "info")
+      flash(f"Username {username} already in use! Please choose another username.", "info")
       return redirect("/register")
   else:
     return render_template("register.html")
@@ -245,11 +244,13 @@ def search():
                                               query_teamname,query_id,query_round)
 
     if "user" in session:
-      username = get_players_teamname(session["user"])
-      return render_template("search_results_logged_in.html", entries = query_results, team_name = username[0][0])
+      team_name = get_players_teamname(session["user"])
+      return render_template("search_results_logged_in.html", entries = query_results, team_name = team_name[0][0])
     else:
       return render_template("search_results_not_logged_in.html", entries = query_results)
   else:
+    if "user" in session:
+      return render_template("search_database_logged_in.html")
     return render_template("search_database_not_logged_in.html")
 
 @app.route("/upload", methods = ["GET","POST"])
