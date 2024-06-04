@@ -9,174 +9,10 @@ app = Flask(__name__)
 app.secret_key = "abcdEFGHw"
 app.permanent_session_lifetime = timedelta(minutes= 5)
 
-""" def get_db_connection(): 
-  conn = psycopg2.connect(host="localhost", dbname="DIS_project", user="bjarkerasmusnicolaisen", 
-                        port="5432", password="admin")
-  return conn """
 conn = get_db_connection()
 cur = conn.cursor()
 
-# ------------------- Initializing a simple database with a few players: --------------------
-cur.execute("DROP TABLE IF EXISTS players;")
-cur.execute("DROP TABLE IF EXISTS chessgames;")
-cur.execute("DROP TABLE IF EXISTS teams;")
-cur.execute("DROP TABLE IF EXISTS plays;")
-cur.execute("DROP TABLE IF EXISTS player_teams")
-cur.execute("CREATE TABLE players (id INT," + 
-            " username CHAR(100), password CHAR(100),rating REAL);")
-test_player = Player("Bjarke",'righty',1780)
-test_player2 = Player("Oscar",'test',1980)
-test_player3 = Player("Niels","test",1000)
-test_player4 = Player("Dragos","test",2500)
-cur.execute("INSERT INTO players (id,username,password,rating) VALUES (%s,%s,%s,%s);", (
-          test_player.id,
-          test_player.username,
-          test_player.password,
-          test_player.rating,
-      ))
-cur.execute("INSERT INTO players (id,username,password,rating) VALUES (%s,%s,%s,%s);", (
-          test_player2.id,
-          test_player2.username,
-          test_player2.password,
-          test_player2.rating,
-      ))
-cur.execute("INSERT INTO players (id,username,password,rating) VALUES (%s,%s,%s,%s);", (
-          test_player3.id,
-          test_player3.username,
-          test_player3.password,
-          test_player3.rating,
-      ))
-cur.execute("INSERT INTO players (id,username,password,rating) VALUES (%s,%s,%s,%s);", (
-          test_player4.id,
-          test_player4.username,
-          test_player4.password,
-          test_player4.rating,
-      ))
-cur.execute("CREATE TABLE plays (player INT, color CHAR(10),game_id INT);")
-cur.execute("INSERT INTO plays (player, color, game_id) VALUES (%s, %s, %s);", 
-            (test_player.id, "Black", "17"))
-cur.execute("INSERT INTO plays (player, color, game_id) VALUES (%s, %s, %s);", 
-            (test_player2.id, "White", "17"))
-cur.execute("INSERT INTO plays (player, color, game_id) VALUES (%s, %s, %s);", 
-            (test_player3.id, "White", "16"))
-cur.execute("INSERT INTO plays (player, color, game_id) VALUES (%s, %s, %s);", 
-            (test_player4.id, "Black", "16"))
-cur.execute("CREATE TABLE chessgames (date DATE," + 
-            " result CHAR(100), gameid INT,moves VARCHAR," +
-            " round CHAR(100), event CHAR(100), board CHAR(100));")
-cur.execute("INSERT INTO chessgames (date,result,gameid,board,round,event,moves) VALUES (%s,%s,%s,%s,%s,%s,%s);", (
-          "2024-05-13",
-          "1-0",
-          "17",
-          "7",
-          "3.5",
-          "Bundesliga 23-24",
-          "1. e4 e5",
-      ))
-cur.execute("INSERT INTO chessgames (date,result,gameid,board,round,event,moves) VALUES (%s,%s,%s,%s,%s,%s,%s);", (
-          "2024-05-13",
-          "1/2-1/2",
-          "16",
-          "6",
-          "3.5",
-          "Bundesliga 23-24",
-          "1. e4 d5",
-      ))
-cur.execute("CREATE TABLE teams (name CHAR(100), event CHAR(100))")
-cur.execute("INSERT INTO teams (name, event) VALUES (%s,%s);", ("team1","Bundesliga 23-24",))
-cur.execute("INSERT INTO teams (name, event) VALUES (%s,%s);", ("team2","Bundesliga 23-24",))
-cur.execute("CREATE TABLE player_teams (player_id INT, team_name CHAR(100))")
-cur.execute("INSERT INTO player_teams (player_id, team_name) VALUES (%s,%s);", (test_player.id,"team1"))
-cur.execute("INSERT INTO player_teams (player_id, team_name) VALUES (%s,%s);", (test_player2.id,"team2"))
-cur.execute("INSERT INTO player_teams (player_id, team_name) VALUES (%s,%s);", (test_player3.id,"team1"))
-cur.execute("INSERT INTO player_teams (player_id, team_name) VALUES (%s,%s);", (test_player4.id,"team2"))
-
-conn.commit()
-cur.close()
-conn.close()
-
-
-
-
-# ---------------------------- Logic for querying database later -------------------------------
-
-""" def insert_new_player(username, password, rating):
-  conn = get_db_connection()
-  cur = conn.cursor()
-  new_player = Player(username,password,rating)
-  cur.execute("INSERT INTO players (id,username,password,rating) VALUES (%s,%s,%s,%s);", (
-      new_player.id,
-      new_player.username,
-      new_player.password,
-      new_player.rating,
-  ))
-  conn.commit()
-  cur.close()
-  conn.close()
-
-
-
-def test_username(name):
-  conn = get_db_connection()
-  cur = conn.cursor()
-  # Now we test if the entered user and password is in our database
-  cur.execute(f"SELECT * FROM players p WHERE p.username = \'{name}\';")
-  user_list = cur.fetchall()
-  cur.close()
-  conn.close()
-  return user_list != []
-
-def test_username_and_password(name,password):
-  conn = get_db_connection()
-  cur = conn.cursor()
-  # Now we test if the entered user and password is in our database
-  cur.execute(f"SELECT * FROM players p WHERE p.username = \'{name}\' AND p.password = \'{password}\';")
-  user_list = cur.fetchall()
-  cur.close()
-  conn.close()
-  return user_list != []
-
-def get_chessgames_by_filters(date=None, event=None, player_name=None, team_name=None,
-                           game_id=None, round=None):
-  sql = """
-"""  SELECT pl1.username, plt1.team_name, pl2.username, plt2.team_name date, result, moves FROM players pl1, players pl2, plays p1, plays p2, chessgames g, player_teams plt1, player_teams plt2 WHERE
-p1.player <> p2.player AND g.gameid = p1.game_id AND p2.game_id = p1.game_id
-AND pl1.id = p1.player AND pl2.id = p2.player AND p1.color = 'White'
-AND plt1.player_id = pl1.id AND plt2.player_id = pl2.id
-"""
-"""
-  if player_name != '':
-    sql = sql + f" AND (pl1.username='{player_name}' OR pl2.username='{player_name}')"
-  if team_name != '':
-    sql = sql + f" AND (plt1.team_name='{team_name}' OR plt2.team_name='{team_name}')" 
-  if date != '':
-    sql = sql + f" AND date='{date}'"
-  if event != '':
-    sql = sql + f" AND event = '{event}'"
-  if game_id != '':
-    sql = sql + f" AND game_id = '{game_id}'"
-  if round != '':
-    sql = sql + f" AND round = '{round}'"
-  conn = get_db_connection()
-  cur = conn.cursor()
-  cur.execute(sql)
-  chessgames = cur.fetchall()
-  cur.close()
-  conn.close()
-  return chessgames
-
-def get_players_teamname(name):
-  sql = f"SELECT team_name FROM players p, player_teams pt WHERE p.id = pt.player_id AND p.username = '{name}'"
-  conn = get_db_connection()
-  cur = conn.cursor()
-  cur.execute(sql)
-  teamname = cur.fetchall()
-  cur.close()
-  conn.close()
-  return teamname
- """
 # ------------------------------------- Routing and core functionality ----------------------------------
-
 
 @app.route("/")
 def home():
@@ -219,13 +55,13 @@ def register():
   if request.method == "POST":
     username = request.form["username"]
     password = request.form["password"]
-    rating   = request.form["rating"]
-    if test_username(username) == False:
+    fideID   = request.form["fideID"]
+    if test_register(username,fideID):
       flash(f"New user {username} registered succesfully!", "info")
-      insert_new_player(username, password, rating)
+      insert_new_user(username, password, fideID)
       return redirect("/")
     else:
-      flash(f"Username {username} already in use! Please choose another username.", "info")
+      flash(f"Username {username} or fideID {fideID} already in use, or fideID does not exist!", "info")
       return redirect("/register")
   else:
     return render_template("register.html")
