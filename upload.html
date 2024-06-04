@@ -1,0 +1,68 @@
+<!-- from https://www.w3schools.com/html/html_forms.asp -->
+
+{% extends "navbar_logged_in.html" %}
+
+{% block title %}Upload PGN{% endblock %}
+{% block content %}
+  {% with messages = get_flashed_messages() %}
+    {% if messages  %}
+      {% for msg in messages: %}
+        <p>{{msg}}</p>
+      {% endfor %}
+    {% endif %}  
+  {% endwith %}
+
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Upload a PGN</h2>
+<p>
+  When uploading a PGN, it must contain the following tags to be eligible for our database:
+</p>
+<p> Event, Date, Round, White, Black, WhiteElo, BlackElo, WhiteTeam, BlackTeam, WhiteFideId, BlackFideId and Result.</p>
+<p>It may contain additional tags, but they will be ignored.</p>
+<p>Also, one of the players have to be you.</p>
+<form method="POST" action="/upload">
+
+  <label for="PGN">Paste your PGN here:</label><br>
+  <input type="PGN" name="PGN" id="pgn"/><br>
+  <input type="submit" value="Upload">
+</form> 
+
+<p>Example of PGN upload:</p>
+<p>
+    [Event "Bundesliga 2023-24"]
+    [Site "Kirchweyhe GER"]
+    [Date "2023.10.21"]
+    [Round "1.1"]
+    [Board "1"]
+    [White "Nisipeanu, Liviu-Dieter"]
+    [Black "Kadric, Denis"]
+    [Result "1/2-1/2"]
+    [WhiteTitle "GM"]
+    [BlackTitle "GM"]
+    [WhiteElo "2600"]
+    [BlackElo "2579"]
+    [ECO "C42"]
+    [Opening "Petrov"]
+    [Variation "classical attack"]
+    [WhiteTeam "USV TU Dresden"]
+    [BlackTeam "SK Kirchweyhe"]
+    [WhiteFideId "1202758"]
+    [BlackFideId "14403803"]
+    [EventDate "2023.10.21"]
+    [EventType "team"]
+    
+    1. e4 e5 2. Nf3 Nf6 3. Nxe5 d6 4. Nf3 Nxe4 5. d4 d5 6. Bd3 Be7 7. O-O Nc6 8.
+    Nbd2 Nd6 9. c3 Bf5 10. Bc2 O-O 11. Bb3 Be6 12. Re1 Nb8 13. Nf1 Re8 14. Ng3 c6
+    15. Bc2 Nd7 16. h3 Nf8 17. Re2 f6 18. Nh4 Qd7 19. Qd3 Bd8 20. b3 Bc7 21. Ba3 g6
+    22. Rae1 Qf7 23. Nf3 Bd7 24. Bc1 Rxe2 25. Rxe2 Re8 26. Qd1 Re6 27. a4 a5 28. Ne1
+    Rxe2 1/2-1/2
+</p>
+
+
+
+</body>
+</html>
+{% endblock %}

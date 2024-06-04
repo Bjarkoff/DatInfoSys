@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PGN Display</title>
+</head>
+<body>
+  {% if pgn %}
+    {% if upload %}
+      <h1>The following PGN was successfully uploaded:</h1>
+      <p>{{ pgn }}</p>
+    {% else %}
+    <h1>The following PGN is invalid or you do not have permission to upload it. It was not uploaded:</h1>
+    <p>{{ pgn }}</p>
+    {% endif %}
+  {% else %}
+    <h1>No PGN Submitted</h1>
+  {% endif %}
+</body>
+</html>
+
