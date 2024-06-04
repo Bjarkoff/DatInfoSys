@@ -71,6 +71,8 @@ cur.execute("""
     elo VARCHAR(4),
     FideId VARCHAR(20) PRIMARY KEY)""")
 
+
+
 cur.execute("""
     CREATE TABLE IF NOT EXISTS Teams (
     Team_name VARCHAR(255) PRIMARY KEY)""")
@@ -232,6 +234,14 @@ for i in range(len(move)):
         conn.commit()
     game_id+=1
 
-
+cur.execute("""
+    CREATE TABLE IF NOT EXISTS Users (
+    username VARCHAR(255),
+    password VARCHAR,
+    FideId VARCHAR(20),
+    PRIMARY KEY (username),
+    FOREIGN KEY (FideId) REFERENCES Players(FideId))""")
+cur.execute("INSERT INTO Users (username, password, FideId) VALUES (%s, %s, %s)", ("kim","1234", "1202758"))
+conn.commit()
 cur.close()
 conn.close()
