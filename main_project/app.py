@@ -4,13 +4,11 @@ from datetime import timedelta
 from models import Player
 import psycopg2
 from queries import *
+import re
 
 app = Flask(__name__)
 app.secret_key = "abcdEFGHw"
 app.permanent_session_lifetime = timedelta(minutes= 5)
-
-conn = get_db_connection()
-cur = conn.cursor()
 
 # ------------------------------------- Routing and core functionality ----------------------------------
 
@@ -88,13 +86,88 @@ def search():
       return render_template("search_database_logged_in.html")
     return render_template("search_database_not_logged_in.html")
 
+Event_pattern = re.compile("\[Event \"(.*?)\"\]", re.MULTILINE)
+Date_pattern = re.compile("\[Date \"(.*?)\"\]", re.MULTILINE)
+Round_pattern = re.compile("\[Round \"(.*?)\"\]", re.MULTILINE)
+White_pattern = re.compile("\[White \"(.*?)\"\]", re.MULTILINE)
+Black_pattern = re.compile("\[Black \"(.*?)\"\]", re.MULTILINE)
+WhiteElo_pattern = re.compile("\[WhiteElo \"(.*?)\"\]", re.MULTILINE)
+BlackElo_pattern = re.compile("\[BlackElo \"(.*?)\"\]", re.MULTILINE)
+WhiteTeam_pattern = re.compile("\[WhiteTeam \"(.*?)\"\]", re.MULTILINE)
+BlackTeam_pattern = re.compile("\[BlackTeam \"(.*?)\"\]", re.MULTILINE)
+Result_pattern = re.compile("\[Result \"(.*?)\"\]", re.MULTILINE)
+Board_pattern = re.compile("\[Board \"(.*?)\"\]", re.MULTILINE)
+move_pattern = re.compile("/]([10][a-zA-Z0-9 \.+\n\/-]*)", re.MULTILINE)
+WhiteFideId_pattern = re.compile("\[WhiteFideId \"(.*?)\"\]", re.MULTILINE)
+BlackFideId_pattern = re.compile("\[BlackFideId \"(.*?)\"\]", re.MULTILINE)
+
+can_upload_query = '''
+SELECT NOT EXISTS (SELECT 1
+FROM chessgame
+WHERE white_player = %s AND black_player = %s AND event = %s AND round = %s)
+    '''
+
+
+find_fideid_query = '''
+SELECT fideid
+FROM users 
+WHERE username = %s
+'''
+
+
+
 @app.route("/upload", methods = ["GET","POST"])
 def upload():
+  conn = get_db_connection()
+  cur = conn.cursor()
+  username = session["user"]
   if request.method == "POST":
     pgn = request.form['PGN']
-    return render_template("upload_results.html", pgn=pgn)
+    if ((White_pattern.search(pgn)) == None or 
+      (Black_pattern.search(pgn)) == None or
+      (Date_pattern.search(pgn)) == None or
+      (Result_pattern.search(pgn)) == None or
+      (Board_pattern.search(pgn)) == None or
+      (Round_pattern.search(pgn)) == None or
+      (Event_pattern.search(pgn)) == None or
+      (move_pattern.search(pgn)) == None or
+      (WhiteFideId_pattern.search(pgn)) == None or
+      BlackFideId_pattern.search(pgn)) == None:
+      cur.close()
+      conn.close()
+      return render_template("upload_results.html", pgn=pgn, upload = False)
+    white = (WhiteFideId_pattern.search(pgn)).group(1)
+    black = (BlackFideId_pattern.search(pgn)).group(1)
+    cur.execute(find_fideid_query, (username,))
+    fideID = cur.fetchone()[0]
+    cur.execute(can_upload_query, (
+      (WhiteFideId_pattern.search(pgn)).group(1), 
+      (BlackFideId_pattern.search(pgn)).group(1), 
+      (Event_pattern.search(pgn)).group(1), 
+      (Round_pattern.search(pgn)).group(1), 
+      ))
+    can_update = cur.fetchone()
+    if (can_update == None):
+      cur.close()
+      conn.close()
+      return render_template("upload_results.html", pgn=pgn, upload = False)
+    if (fideID == white or fideID == black) and can_update[0]:
+      pgn_upload(pgn)
+      cur.close()
+      conn.close()
+      return render_template("upload_results.html", pgn=pgn, upload = True)
+    else:
+      cur.close()
+      conn.close()
+      return render_template("upload_results.html", pgn=pgn, upload = False)
   else:
+    cur.close()
+    conn.close()
     return render_template("upload.html")
+
+
+
+
 
 if __name__ == "__main__":
     app.run(debug=True) 
