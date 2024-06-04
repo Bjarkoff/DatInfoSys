@@ -108,7 +108,7 @@ for i in range(len(black)):
     if not record_exists:
         cur.execute(
             sql.SQL("INSERT INTO Players (name, elo, FideId) VALUES (%s, %s, %s)"),
-            (black[i], whitelo[i], BlackFideId[i])
+            (black[i], BlackElo[i], BlackFideId[i])
         )
         conn.commit()
 
@@ -232,7 +232,7 @@ for i in range(len(move)):
     if not record_exists:
         cur.execute("INSERT INTO Chessgame (white_player, black_player, Date, game_id, moves, round, Event, board, result) VALUES (%s, %s, %s,%s, %s, %s,%s, %s, %s)", (WhiteFideId[i],BlackFideId[i],date[i],game_id,move[i].replace("\n", " "),round[i],event[i],Board[i],Result[i]))
         conn.commit()
-    game_id+=1
+        game_id+=1
 
 cur.execute("""
     CREATE TABLE IF NOT EXISTS Users (
