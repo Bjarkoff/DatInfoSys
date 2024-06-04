@@ -27,7 +27,8 @@
     <h1>Games</h1>
     <ol>
       {% for entry in entries %}
-        <li> {{ entry[0] }} from team {{ entry[1]}} - {{entry[2]}} from team {{ entry[3]}}, result: {{ entry[4] }}.</li><br>
+        <li> {{ entry[0] }} from team {{ entry[1]}} - {{entry[2]}} from team {{ entry[3]}}, result: {{ entry[5]}}. 
+          Date: {{ entry[4] }}. Round: {{ entry[6] }}. Event: {{ entry[7]}} </li><br>
       {% endfor %}
     </ol>
   </body>

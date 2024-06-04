@@ -28,10 +28,12 @@
     <ol>
       {% for entry in entries %}
         {% if entry[1] == team_name or entry[3] == team_name: %}
-          <li> {{ entry[0] }} from team {{ entry[1]}} - {{entry[2]}} from team {{ entry[3]}}, result: {{ entry[4] }}. <br>
-          And the moves: {{ entry[5] }} </li><br>
+          <li> {{ entry[0] }} from team {{ entry[1]}} - {{entry[2]}} from team {{ entry[3]}}, result: {{ entry[5]}}. 
+            Date: {{ entry[4] }}. Round: {{ entry[6] }}. Event: {{ entry[7]}}. <br>
+          And the moves: {{ entry[8] }} </li><br>
         {% else %}
-        <li> {{ entry[0] }} from team {{ entry[1]}} - {{entry[2]}} from team {{ entry[3]}}, result: {{ entry[4] }}.</li><br>
+        <li> {{ entry[0] }} from team {{ entry[1]}} - {{entry[2]}} from team {{ entry[3]}}, result: {{ entry[5]}}. 
+          Date: {{ entry[4] }}. Round: {{ entry[6] }}. Event: {{ entry[7]}}. </li><br>
         {% endif %}
       {% endfor %}
     </ol>
