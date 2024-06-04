@@ -14,7 +14,7 @@ BlackFideId_pattern = re.compile("^\[BlackFideId \"(.*)\"\]", re.MULTILINE)
 WhiteTeam_pattern = re.compile("^\[WhiteTeam \"(.*)\"\]", re.MULTILINE)
 BlackTeam_pattern = re.compile("^\[BlackTeam \"(.*)\"\]", re.MULTILINE)
 Result_pattern = re.compile("^\[Result \"(.*)\"\]", re.MULTILINE)
-move_pattern = re.compile("(^1\. [a-zA-Z0-9 \.+\n\/-]*)", re.MULTILINE)
+move_pattern = re.compile("(^[10][a-zA-Z0-9 \.+\n\/-]*)", re.MULTILINE)
 Board_pattern = re.compile("^\[Board \"(.*)\"\]", re.MULTILINE)
 
 
