@@ -97,7 +97,7 @@ WhiteTeam_pattern = re.compile("\[WhiteTeam \"(.*?)\"\]", re.MULTILINE)
 BlackTeam_pattern = re.compile("\[BlackTeam \"(.*?)\"\]", re.MULTILINE)
 Result_pattern = re.compile("\[Result \"(.*?)\"\]", re.MULTILINE)
 Board_pattern = re.compile("\[Board \"(.*?)\"\]", re.MULTILINE)
-move_pattern = re.compile("/]([10][a-zA-Z0-9 \.+\n\/-]*)", re.MULTILINE)
+move_pattern = re.compile("\] ([10][a-zA-Z0-9 \.+\n\/-]*)", re.MULTILINE)
 WhiteFideId_pattern = re.compile("\[WhiteFideId \"(.*?)\"\]", re.MULTILINE)
 BlackFideId_pattern = re.compile("\[BlackFideId \"(.*?)\"\]", re.MULTILINE)
 
@@ -123,6 +123,18 @@ def upload():
   username = session["user"]
   if request.method == "POST":
     pgn = request.form['PGN']
+    print("HEJJJJJ")
+    print(White_pattern.search(pgn) == None)
+    print(Black_pattern.search(pgn) == None)
+    print(Date_pattern.search(pgn) == None)
+    print(Result_pattern.search(pgn) == None)
+    print(Board_pattern.search(pgn) == None)
+    print(Round_pattern.search(pgn) == None)
+    print(Event_pattern.search(pgn) == None)
+    print(move_pattern.search(pgn) == None)
+    print(WhiteFideId_pattern.search(pgn) == None)
+    print(BlackFideId_pattern.search(pgn) == None)
+  
     if ((White_pattern.search(pgn)) == None or 
       (Black_pattern.search(pgn)) == None or
       (Date_pattern.search(pgn)) == None or
@@ -132,10 +144,11 @@ def upload():
       (Event_pattern.search(pgn)) == None or
       (move_pattern.search(pgn)) == None or
       (WhiteFideId_pattern.search(pgn)) == None or
-      BlackFideId_pattern.search(pgn)) == None:
-      cur.close()
-      conn.close()
-      return render_template("upload_results.html", pgn=pgn, upload = False)
+      (BlackFideId_pattern.search(pgn)) == None):
+        print("here??")
+        cur.close()
+        conn.close()
+        return render_template("upload_results.html", pgn=pgn, upload = False)
     white = (WhiteFideId_pattern.search(pgn)).group(1)
     black = (BlackFideId_pattern.search(pgn)).group(1)
     cur.execute(find_fideid_query, (username,))
