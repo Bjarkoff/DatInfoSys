@@ -36,7 +36,8 @@ with open('bund2324.pgn', 'r') as textfile:
     move = move_pattern.findall(tmp)
     Board = Board_pattern.findall(tmp)
 
-
+for elm in move:
+    elm.replace("\n", "")
 
 # Connect to the PostgreSQL server
 conn = psycopg2.connect(
@@ -226,7 +227,7 @@ for i in range(len(move)):
     cur.execute("SELECT EXISTS(SELECT 1 FROM Chessgame WHERE white_player = %s AND black_player = %s AND Event = %s AND round = %s)", (WhiteFideId[i], BlackFideId[i], event[i], round[i]))
     record_exists = cur.fetchone()[0]
     if not record_exists:
-        cur.execute("INSERT INTO Chessgame (white_player, black_player, Date, game_id, moves, round, Event, board) VALUES (%s, %s, %s,%s, %s, %s,%s, %s)", (WhiteFideId[i],BlackFideId[i],date[i],game_id,move[i],round[i],event[i],Board[i]))
+        cur.execute("INSERT INTO Chessgame (white_player, black_player, Date, game_id, moves, round, Event, board) VALUES (%s, %s, %s,%s, %s, %s,%s, %s)", (WhiteFideId[i],BlackFideId[i],date[i],game_id,move[i].replace("\n", " "),round[i],event[i],Board[i]))
         conn.commit()
     game_id+=1
 
