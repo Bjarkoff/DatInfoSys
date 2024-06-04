@@ -213,10 +213,11 @@ cur.execute("""
     black_player VARCHAR(255) REFERENCES Players(FideId),   
     Date VARCHAR(255),
     game_id VARCHAR(255),
-    moves VARCHAR(2000),
+    moves VARCHAR,
     round VARCHAR(255),
     Event VARCHAR(255),
     board VARCHAR(255),
+    result VARCHAR,
          
     PRIMARY KEY (white_player, black_player, game_id),
     FOREIGN KEY (Event, round) REFERENCES Team_match(Event, round)
@@ -227,7 +228,7 @@ for i in range(len(move)):
     cur.execute("SELECT EXISTS(SELECT 1 FROM Chessgame WHERE white_player = %s AND black_player = %s AND Event = %s AND round = %s)", (WhiteFideId[i], BlackFideId[i], event[i], round[i]))
     record_exists = cur.fetchone()[0]
     if not record_exists:
-        cur.execute("INSERT INTO Chessgame (white_player, black_player, Date, game_id, moves, round, Event, board) VALUES (%s, %s, %s,%s, %s, %s,%s, %s)", (WhiteFideId[i],BlackFideId[i],date[i],game_id,move[i].replace("\n", " "),round[i],event[i],Board[i]))
+        cur.execute("INSERT INTO Chessgame (white_player, black_player, Date, game_id, moves, round, Event, board, result) VALUES (%s, %s, %s,%s, %s, %s,%s, %s, %s)", (WhiteFideId[i],BlackFideId[i],date[i],game_id,move[i].replace("\n", " "),round[i],event[i],Board[i],Result[i]))
         conn.commit()
     game_id+=1
 
