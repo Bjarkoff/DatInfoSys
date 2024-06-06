@@ -1,8 +1,6 @@
 # save this as app.py
 from flask import Flask, redirect, url_for, render_template, request, session, flash
 from datetime import timedelta
-from models import Player
-import psycopg2
 from queries import *
 import re
 
@@ -123,17 +121,6 @@ def upload():
   username = session["user"]
   if request.method == "POST":
     pgn = request.form['PGN']
-    print("HEJJJJJ")
-    print(White_pattern.search(pgn) == None)
-    print(Black_pattern.search(pgn) == None)
-    print(Date_pattern.search(pgn) == None)
-    print(Result_pattern.search(pgn) == None)
-    print(Board_pattern.search(pgn) == None)
-    print(Round_pattern.search(pgn) == None)
-    print(Event_pattern.search(pgn) == None)
-    print(move_pattern.search(pgn) == None)
-    print(WhiteFideId_pattern.search(pgn) == None)
-    print(BlackFideId_pattern.search(pgn) == None)
   
     if ((White_pattern.search(pgn)) == None or 
       (Black_pattern.search(pgn)) == None or
@@ -145,7 +132,6 @@ def upload():
       (move_pattern.search(pgn)) == None or
       (WhiteFideId_pattern.search(pgn)) == None or
       (BlackFideId_pattern.search(pgn)) == None):
-        print("here??")
         cur.close()
         conn.close()
         return render_template("upload_results.html", pgn=pgn, upload = False)

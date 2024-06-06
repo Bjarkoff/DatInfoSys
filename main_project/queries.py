@@ -1,5 +1,4 @@
 import psycopg2
-from models import Player
 import re
 from psycopg2 import sql
 
@@ -243,9 +242,7 @@ def pgn_upload(pgn):
   game_id = cur.fetchone()[0] + 1
 
 
-  print(len(move))
   for i in range(len(move)):
-      print("hej!!")
       cur.execute("SELECT EXISTS(SELECT 1 FROM Chessgame WHERE white_player = %s AND black_player = %s AND Event = %s AND round = %s)", (WhiteFideId[i], BlackFideId[i], event[i], round[i]))
       record_exists = cur.fetchone()[0]
       if not record_exists:
