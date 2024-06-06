@@ -1,6 +1,6 @@
 setup database:
 to setup the database, run the code in MakeDatabase.py in the main folder, which must contain the bund2324.pgn file.
-before running MakeDatabase.py change PostgreSQL server info on line 44 and 60 in MakeDatabase.py.
+before running MakeDatabase.py change PostgreSQL server info on line 44 and 60 in MakeDatabase.py and on line 5 in queries.py.
 
 To run the web-app you should run the App.py file in a terminal and 
 then enter "http://127.0.0.1:5000/" into a browser.
