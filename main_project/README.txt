@@ -5,17 +5,27 @@ before running MakeDatabase.py change PostgreSQL server info on line 44 and 60 i
 To run the web-app you should run the App.py file in a terminal and 
 then enter "http://127.0.0.1:5000/" into a browser.
 
-In the web-app, while not logged in you will have the option to search
-for games in the database by inputting your desired search parameters. 
-You will then get to see the results of the games that match the 
-search parameters. You will also be able to register and log in. 
-When registering, you should input a username, your password and your 
-FIDE-ID. You can only register, if you are a player in the database and
-no account is registered with your FIDE-ID. While searching when logged
-in, you will also be able to see the moves from any game played by any
-player in the same team as you. When logged in, you also have the 
+The project is a database over team matches in chess. 
+The idea is to allow users, who are not logged in, to 
+search the database, however when not logged in the user
+is not allowed to see actual moves of the games played 
+(since this information contains valuable information
+about players' styles and habits).
+
+To login, one has to be a user already in the database,
+or register. The database is initialized with one user, 
+with the username "kim", the password "1234" and the FIDE-ID "1202758".
+To register a new user, one has to choose a username that has not been used,
+a password, and a fideID which is both registered with an existing 
+player in the database, and not registered with an existing user.
+The validation of the new user exists then only in the knowledge
+of a relevant fideID.
+
+Once logged in, the user can search the database as before,
+however while searching when logged in the user will also be able 
+to see the moves from any game played by any
+player in the same team as the user. When logged in, the user also has the 
 additional option of uploading games (PGNs). You are only able to 
 upload a game, if you are one of the players, who played that game,
-base on FIDE-ID.
-The database is initialized with one user, with the username "kim", 
-the password "1234" and the FIDE-ID "1202758".
+based on FIDE-ID.
+
