@@ -17,3 +17,5 @@ player in the same team as you. When logged in, you also have the
 additional option of uploading games (PGNs). You are only able to 
 upload a game, if you are one of the players, who played that game,
 base on FIDE-ID.
+The database is initialized with one user, with the username "kim", 
+the password "1234" and the FIDE-ID "1202758".
