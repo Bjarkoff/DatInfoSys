@@ -116,53 +116,57 @@ WHERE username = %s
 
 @app.route("/upload", methods = ["GET","POST"])
 def upload():
-  conn = get_db_connection()
-  cur = conn.cursor()
-  username = session["user"]
-  if request.method == "POST":
-    pgn = request.form['PGN']
-  
-    if ((White_pattern.search(pgn)) == None or 
-      (Black_pattern.search(pgn)) == None or
-      (Date_pattern.search(pgn)) == None or
-      (Result_pattern.search(pgn)) == None or
-      (Board_pattern.search(pgn)) == None or
-      (Round_pattern.search(pgn)) == None or
-      (Event_pattern.search(pgn)) == None or
-      (move_pattern.search(pgn)) == None or
-      (WhiteFideId_pattern.search(pgn)) == None or
-      (BlackFideId_pattern.search(pgn)) == None):
+  if "user" in session:
+    conn = get_db_connection()
+    cur = conn.cursor()
+    username = session["user"]
+    if request.method == "POST":
+      pgn = request.form['PGN']
+    
+      if ((White_pattern.search(pgn)) == None or 
+        (Black_pattern.search(pgn)) == None or
+        (Date_pattern.search(pgn)) == None or
+        (Result_pattern.search(pgn)) == None or
+        (Board_pattern.search(pgn)) == None or
+        (Round_pattern.search(pgn)) == None or
+        (Event_pattern.search(pgn)) == None or
+        (move_pattern.search(pgn)) == None or
+        (WhiteFideId_pattern.search(pgn)) == None or
+        (BlackFideId_pattern.search(pgn)) == None):
+          cur.close()
+          conn.close()
+          return render_template("upload_results.html", pgn=pgn, upload = False)
+      white = (WhiteFideId_pattern.search(pgn)).group(1)
+      black = (BlackFideId_pattern.search(pgn)).group(1)
+      cur.execute(find_fideid_query, (username,))
+      fideID = cur.fetchone()[0]
+      cur.execute(can_upload_query, (
+        (WhiteFideId_pattern.search(pgn)).group(1), 
+        (BlackFideId_pattern.search(pgn)).group(1), 
+        (Event_pattern.search(pgn)).group(1), 
+        (Round_pattern.search(pgn)).group(1), 
+        ))
+      can_update = cur.fetchone()
+      if (can_update == None):
         cur.close()
         conn.close()
         return render_template("upload_results.html", pgn=pgn, upload = False)
-    white = (WhiteFideId_pattern.search(pgn)).group(1)
-    black = (BlackFideId_pattern.search(pgn)).group(1)
-    cur.execute(find_fideid_query, (username,))
-    fideID = cur.fetchone()[0]
-    cur.execute(can_upload_query, (
-      (WhiteFideId_pattern.search(pgn)).group(1), 
-      (BlackFideId_pattern.search(pgn)).group(1), 
-      (Event_pattern.search(pgn)).group(1), 
-      (Round_pattern.search(pgn)).group(1), 
-      ))
-    can_update = cur.fetchone()
-    if (can_update == None):
-      cur.close()
-      conn.close()
-      return render_template("upload_results.html", pgn=pgn, upload = False)
-    if (fideID == white or fideID == black) and can_update[0]:
-      pgn_upload(pgn)
-      cur.close()
-      conn.close()
-      return render_template("upload_results.html", pgn=pgn, upload = True)
+      if (fideID == white or fideID == black) and can_update[0]:
+        pgn_upload(pgn)
+        cur.close()
+        conn.close()
+        return render_template("upload_results.html", pgn=pgn, upload = True)
+      else:
+        cur.close()
+        conn.close()
+        return render_template("upload_results.html", pgn=pgn, upload = False)
     else:
       cur.close()
       conn.close()
-      return render_template("upload_results.html", pgn=pgn, upload = False)
+      return render_template("upload.html")
   else:
-    cur.close()
-    conn.close()
-    return render_template("upload.html")
+    flash("You need to log in to upload")
+    return render_template("index_not_logged_in.html")
 
 
 
